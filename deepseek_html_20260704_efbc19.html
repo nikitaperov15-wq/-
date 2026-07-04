@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Каталог дверей из массива</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f2ece2;color:#2e2416}
+
+header{background:linear-gradient(135deg,#4a2e0e,#8b6235);padding:18px 20px 12px;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.25)}
+header h1{color:#f5e8d0;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+header .sub{color:#e8c98a;font-size:12px;letter-spacing:3px;margin-top:4px}
+
+.contacts{background:#2a1a06;color:#f5e8d0;padding:10px 20px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px 28px;font-size:14px;border-bottom:2px solid #7a5530}
+.contacts a{color:#e8c98a;text-decoration:none;font-weight:500}
+.contacts a:hover{color:#f5e8d0}
+.contacts .addr{color:#b89060;font-size:13px}
+
+.mat-tabs{display:flex;background:#2a1a06}
+.mat-tab{flex:1;background:none;border:none;color:#a07840;padding:13px 8px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;text-transform:uppercase;letter-spacing:1px}
+.mat-tab:hover{color:#f5e8d0;background:rgba(255,255,255,.05)}
+.mat-tab.on{color:#f5e8d0;border-bottom-color:#e8c98a}
+
+.type-bar{background:#faf5ee;border-bottom:1px solid #ddd0bc;padding:7px 14px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.type-bar label{font-size:11px;color:#9a7a55;font-weight:600;margin-right:4px}
+.tbtn{background:#fff;border:1px solid #c8b090;color:#6b4c2a;padding:3px 11px;border-radius:20px;font-size:11px;cursor:pointer;transition:all .18s}
+.tbtn:hover,.tbtn.on{background:#7a5530;color:#fff;border-color:#7a5530}
+
+.count{text-align:center;padding:9px 14px 3px;font-size:12px;color:#8a6a45}
+.count strong{font-size:17px;color:#3a2510;font-weight:700}
+.pagination{display:flex;justify-content:center;gap:6px;padding:10px 14px 20px;flex-wrap:wrap}
+.page-btn{background:#fff;border:1px solid #c8b090;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px;transition:all .18s}
+.page-btn:hover{background:#f0e8d8}
+.page-btn.active{background:#7a5530;color:#fff;border-color:#7a5530}
+.page-btn.disabled{opacity:.4;pointer-events:none}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:10px 14px 0;max-width:1440px;margin:0 auto}
+
+.card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(80,50,15,.10);transition:transform .2s,box-shadow .2s;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(80,50,15,.18)}
+
+.photo{position:relative;width:100%;padding-top:150%;background:#ece7df;border-radius:10px 10px 0 0;overflow:hidden}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;transition:transform .28s}
+.card:hover .photo img{transform:scale(1.04)}
+
+.badge{position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;z-index:2;pointer-events:none}
+.bs{background:rgba(55,32,8,.82);color:#fff}
+.bg{background:rgba(30,80,125,.86);color:#fff}
+.bp{background:rgba(45,90,40,.86);color:#fff}
+
+.cbody{padding:8px 9px 10px;display:flex;flex-direction:column;flex:1}
+.clabel{font-size:9px;font-weight:700;color:#b09060;text-transform:uppercase;letter-spacing:1px;margin-bottom:1px}
+.cname{font-size:12px;font-weight:700;color:#2e1a08;margin-bottom:4px;line-height:1.2}
+
+.swatches{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.sw{width:17px;height:17px;border-radius:50%;border:2px solid #d8c8b0;cursor:pointer;transition:transform .14s,border-color .14s,box-shadow .14s;flex-shrink:0}
+.sw:hover{transform:scale(1.2);border-color:#7a5530}
+.sw.on{border-color:#7a5530;box-shadow:0 0 0 2px #fff,0 0 0 3px #7a5530;transform:scale(1.1)}
+.swlbl{font-size:9px;color:#9a7a55;margin-bottom:4px;min-height:11px}
+
+.cfoot{display:flex;align-items:center;justify-content:flex-end;padding-top:6px;border-top:1px solid #f0e8d8;margin-top:auto}
+.bdet{background:#7a5530;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:10px;cursor:pointer;white-space:nowrap;transition:background .18s}
+.bdet:hover{background:#4a2e0e}
+
+.nores{grid-column:1/-1;text-align:center;padding:60px 20px;color:#a07848;font-size:16px}
+
+.ov{display:none;position:fixed;inset:0;background:rgba(10,5,0,.78);z-index:1000;align-items:center;justify-content:center;padding:12px}
+.ov.open{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:780px;width:100%;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.mhead{background:linear-gradient(90deg,#4a2e0e,#8b6235);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;flex-shrink:0}
+.mhead h2{color:#f5e8d0;font-size:14px;font-weight:600}
+.mx{background:none;border:none;color:rgba(245,232,208,.7);font-size:24px;cursor:pointer;line-height:1}
+.mx:hover{color:#f5e8d0}
+.mbody{display:grid;grid-template-columns:1fr 1.1fr;gap:18px;padding:16px}
+@media(max-width:520px){.mbody{grid-template-columns:1fr}}
+.mphoto{position:relative;width:100%;padding-top:150%;background:#ece7df;border-radius:10px;overflow:hidden}
+.mphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.minfo h3{font-size:16px;color:#2e1a08;margin-bottom:3px}
+.mtag{display:inline-block;background:#f0e8d8;color:#7a5530;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;margin-bottom:9px}
+.mclbl{font-size:11px;color:#7a5530;font-weight:600;min-height:14px;margin-bottom:7px}
+.msw-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:3px}
+.msw{width:22px;height:22px;border-radius:50%;border:2px solid #d8c8b0;cursor:pointer;transition:transform .14s,border-color .14s,box-shadow .14s}
+.msw:hover{transform:scale(1.15);border-color:#7a5530}
+.msw.on{border-color:#7a5530;box-shadow:0 0 0 2px #fff,0 0 0 3px #7a5530}
+.specs{width:100%;border-collapse:collapse;font-size:11px;margin-top:9px}
+.specs td{padding:5px 0;border-bottom:1px solid #f5ede0}
+.specs td:first-child{color:#a07848;width:42%;font-weight:500}
+.specs td:last-child{color:#2e1a08;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>Каталог дверей</h1>
+  <div class="sub">Двери из массива</div>
+</header>
+
+<div class="contacts">
+  <span>📞 <a href="tel:+375447585706">+375 (44) 758-57-06</a> (Никита)</span>
+  <span>📞 <a href="tel:+375296502149">+375 (29) 650-21-49</a> (Николай)</span>
+  <span class="addr">🏭 Беларусь, Гомельская обл., Житковичи, Житковичи-1</span>
+</div>
+
+<div class="mat-tabs">
+  <button class="mat-tab on" data-mat="olkha">🌿 Массив ольхи</button>
+  <button class="mat-tab" data-mat="sosna">🌲 Массив сосны</button>
+</div>
+
+<div class="type-bar">
+  <label>Тип:</label>
+  <button class="tbtn on" data-g="all">Все</button>
+  <button class="tbtn" data-g="глухая">Глухая</button>
+  <button class="tbtn" data-g="остекленная">Остекленная</button>
+  <button class="tbtn" data-g="частично остекленная">Частично</button>
+</div>
+
+<div class="count"><strong id="cNum">0</strong> <span id="cLbl">моделей</span></div>
+<div class="grid" id="grid"></div>
+<div class="pagination" id="pagination"></div>
+
+<div class="ov" id="ov">
+  <div class="modal">
+    <div class="mhead"><h2 id="mH">—</h2><button class="mx" id="mX">×</button></div>
+    <div class="mbody">
+      <div class="mphoto"><img id="mImg" src="" alt=""></div>
+      <div class="minfo">
+        <div class="mtag" id="mTag">—</div>
+        <h3 id="mName">—</h3>
+        <div style="font-size:10px;color:#bbb;margin-bottom:4px">Выберите цвет:</div>
+        <div class="msw-wrap" id="mSwatches"></div>
+        <div class="mclbl" id="mCLbl"></div>
+        <table class="specs" id="mSpecs"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== ДАННЫЕ (без Феррара, Лондон, без упоминаний ОКА) =====
+const B='https://www.oka-dveri.by/sites/default/files/styles/catalog1/public/dveri/2023-06/';
+
+const olkha=[
+  // ВИТРАЖ
+  {m:'Витраж',g:'остекленная',c:'серый',coat:'эмаль',i:B+'e890e680015416c2c222ab2caf297dd1.png?itok=wowASsvQ'},
+  {m:'Витраж',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'3fdd9c0f7f5c6e545adc989f3ec30b20.png?itok=-6cQ3C7W'},
+  {m:'Витраж',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'0dd98f16450b5d3832c23fb3ea77995a.png?itok=cfXfI9iw'},
+  {m:'Витраж',g:'остекленная',c:'темный',coat:'бейц',i:B+'0d2dfd0bc1aaf9700f79109712eb4c45.png?itok=80M9ont0'},
+  {m:'Витраж',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'25bd04f4ecace239f40be85d8f050319.png?itok=vIGBYRa_'},
+  {m:'Витраж',g:'остекленная',c:'серый2',coat:'бейц',i:B+'a5983fc6a7d3157dddc29ec912fa123f.png?itok=zs7d_Go-'},
+  {m:'Витраж',g:'глухая',c:'коричневый',coat:'бейц',i:B+'07b4bbd040f10dc7e37a499d452c42f3.jpg?itok=IuOLtCj_'},
+  {m:'Витраж',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'dcf7e4d933b8032285685bcf1b737b0c.png?itok=EAj9xejK'},
+  {m:'Витраж',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'1e21a5f10c3717dcc1ddd811e96bd269.png?itok=uhkyi7Bm'},
+  {m:'Витраж',g:'остекленная',c:'темный2',coat:'бейц',i:B+'710918d9d271946b0850afe3c268afa3.png?itok=g4ct_9Pv'},
+  // ПРЕМЬЕР
+  {m:'Премьер',g:'остекленная',c:'серый',coat:'бейц',i:B+'79fce7854d395cb20b84a8c2c68486fa.png?itok=l2NrD2j1'},
+  {m:'Премьер',g:'остекленная',c:'темный',coat:'бейц',i:B+'d0e799331fc1bebd598accd976efb28d.png?itok=SNJ5LWmz'},
+  {m:'Премьер',g:'частично остекленная',c:'темный',coat:'бейц',i:B+'3bab42b5d86ee8a20827dcd87212d4ed.png?itok=Wxz66LMy'},
+  {m:'Премьер',g:'частично остекленная',c:'серый',coat:'бейц',i:B+'6c4479b73860cf5495652c02b1c8d840.png?itok=PoR6NEkH'},
+  // ПРЕМЬЕР+
+  {m:'Премьер+',g:'частично остекленная',c:'кремовый',coat:'эмаль',i:B+'3e133b35aac3bdb1c5f83da9ce02d240.jpg?itok=493S80-l'},
+  {m:'Премьер+',g:'частично остекленная',c:'белый',coat:'эмаль',i:B+'bcc4717ec7675df248cf9e3de88c5980.png?itok=YgNTKXka'},
+  {m:'Премьер+',g:'частично остекленная',c:'серый',coat:'эмаль',i:B+'6e699629e0076b902e4454c1c6623d4e.png?itok=-kPbbDae'},
+  {m:'Премьер+',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'85607bdb98c8c2618b8748a99d85440a.png?itok=XSH5VrxJ'},
+  {m:'Премьер+',g:'остекленная',c:'темный',coat:'бейц',i:B+'7bdd60a4d5aa1123cd39fc3b8021da1f.jpg?itok=0ERbAN7p'},
+  {m:'Премьер+',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'68e0a8e560889a7800ae9ea841d6860e.png?itok=uvP_tqQK'},
+  {m:'Премьер+',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'a1978be3b7cf62f803ab7f940e855a42.png?itok=GN-eZJzL'},
+  {m:'Премьер+',g:'частично остекленная',c:'натуральный',coat:'бейц',i:B+'db8d97f46023bdc0ccd23c8d2dd3f273.png?itok=10oUisxc'},
+  {m:'Премьер+',g:'частично остекленная',c:'темный',coat:'бейц',i:B+'8245b374c0991bc42beb74bd1cc16188.png?itok=jv61FlBy'},
+  {m:'Премьер+',g:'частично остекленная',c:'бордовый',coat:'бейц',i:B+'7f52c26fa875a7ea62f8805135b74026.jpg?itok=p1XzJjIP'},
+  {m:'Премьер+',g:'частично остекленная',c:'коричневый',coat:'бейц',i:B+'236fe27ad66882a490cfde768e5c5a41.png?itok=Olqvgnkz'},
+  // ЭЛЕГИЯ
+  {m:'Элегия',g:'глухая',c:'голубой',coat:'эмаль',i:B+'3e28b2e0b6ef5bd22090d2afba83c1c1.png?itok=rM0GTKGb'},
+  {m:'Элегия',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'1138810230a809733db280e28db9041c.jpg?itok=ANl3E4OR'},
+  {m:'Элегия',g:'глухая',c:'серый',coat:'эмаль',i:B+'80bb972bf82ac8839bccc333023bcb64.jpg?itok=Ud7xLdOd'},
+  {m:'Элегия',g:'глухая',c:'белый',coat:'эмаль',i:B+'dcb750645176222fc94bf945b6f05aae.jpg?itok=fm-DG7RD'},
+  {m:'Элегия',g:'глухая',c:'слоновая кость',coat:'эмаль',i:B+'faaa5003f504d6a3357a67ade0422b84.jpg?itok=lM4g7MgR'},
+  {m:'Элегия',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'0391ac25566ee8cd1ed39c612cae62c5.png?itok=fJdFCIxu'},
+  {m:'Элегия',g:'остекленная',c:'серый',coat:'эмаль',i:B+'ab6848ef379600a5444c97d26c641a49.JPG?itok=OOMwqyQB'},
+  {m:'Элегия',g:'остекленная',c:'белый',coat:'эмаль',i:B+'248475d6409714acbb0ef5997b7c571c.JPG?itok=PxVoFSAZ'},
+  {m:'Элегия',g:'остекленная',c:'слоновая кость',coat:'эмаль',i:B+'62fc4e08b20331f50cf33c5b6253e5b7.jpg?itok=manXceKX'},
+  {m:'Элегия',g:'остекленная',c:'темный',coat:'бейц',i:B+'7963a1d938e6a5f99063d92b623adc42.png?itok=SYY19LH7'},
+  {m:'Элегия',g:'глухая',c:'темный',coat:'бейц',i:B+'a1be802b2be9d7e1e74f6976e639b9c0.jpg?itok=6ME6tNLw'},
+  {m:'Элегия',g:'глухая',c:'бордовый',coat:'бейц',i:B+'512f04a0242050297fb9efaaa9d62b2c.png?itok=K6Ih4YlV'},
+  {m:'Элегия',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'b48af4a85301c95665b9977e19d8f3cc.png?itok=-2RvRbJN'},
+  {m:'Элегия',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'829eacbda0c0c1fd4665e7e87548f442.jpg?itok=I1itYC1C'},
+  {m:'Элегия',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'f511999ee7be091b23ad7b82f601fe94.png?itok=RtRXB1h3'},
+  {m:'Элегия',g:'глухая',c:'серый2',coat:'бейц',i:B+'b5d26357e19b018ba8fe384ff5d9833c.png?itok=7l2N14Pr'},
+  {m:'Элегия',g:'глухая',c:'коричневый',coat:'бейц',i:B+'be034728844a5662d08d156db72fdae1.jpg?itok=YW5H01LB'},
+  {m:'Элегия',g:'остекленная',c:'темный2',coat:'бейц',i:B+'090ae3586eedfcd7bacfff04b1b8f22f.png?itok=JS85uwVL'},
+  {m:'Элегия',g:'глухая',c:'темный2',coat:'бейц',i:B+'5d983f6d2ddbfdaed0fb728cdc03b34d.png?itok=5BTESdIU'},
+  {m:'Элегия',g:'глухая',c:'натуральный',coat:'бейц',i:B+'fa8912af18273fbdf5d384bf57b1572a.png?itok=iyqDemUn'},
+  // СОРЕНТО
+  {m:'Соренто',g:'остекленная',c:'темный',coat:'бейц',i:B+'54859aada21adde561f9350f8379d08d.png?itok=2kAyZMNJ'},
+  {m:'Соренто',g:'глухая',c:'бордовый',coat:'бейц',i:B+'8a45b9d36bba1d2f8b07fe6da1c7dcfd.png?itok=_9QKaw0_'},
+  {m:'Соренто',g:'глухая',c:'коричневый',coat:'бейц',i:B+'b9929a0e3aec14917b47979efad71eb8.png?itok=xP19f0pJ'},
+  {m:'Соренто',g:'остекленная',c:'серый',coat:'бейц',i:B+'22d8670cca27bec512efc538045232f2.png?itok=ztS4KLgJ'},
+  {m:'Соренто',g:'глухая',c:'темный',coat:'бейц',i:B+'db27e67789ea099f6818228a0bde2877.png?itok=wmkauchj'},
+  {m:'Соренто',g:'глухая',c:'серый',coat:'бейц',i:B+'826de55a4590809f7d48ac481abeac70.png?itok=yFuTLj06'},
+  {m:'Соренто',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'8945c9d3ceed59e5e39269d5baa42122.png?itok=ceZ8vQ9A'},
+  {m:'Соренто',g:'остекленная',c:'темный2',coat:'бейц',i:B+'56e738e62d9d1d5f6039c5b09f8f5684.png?itok=t6VYhGBj'},
+  {m:'Соренто',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'7d4f6e99311a8597e9e21a4820d84a1d.png?itok=pjJnS9go'},
+  {m:'Соренто',g:'глухая',c:'темный2',coat:'бейц',i:B+'6bae03a1b93039e7ddfde7a73c899147.png?itok=GFAXqRdk'},
+  {m:'Соренто',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'2a4b1572e10650109b423700c4295d0e.png?itok=uz8XnIg0'},
+  {m:'Соренто',g:'глухая',c:'натуральный',coat:'бейц',i:B+'0b13790500f74de2497540e8aa0212de.png?itok=kCfAlw93'},
+  // ВАЛЕНСИЯ
+  {m:'Валенсия',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'bf20b33c76c75bbfba24c5ff462502f5.jpg?itok=Z_g0UXYP'},
+  {m:'Валенсия',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'26dbbc0669c15d3a45c950b3885b4d4a.png?itok=K4CJZJOt'},
+  {m:'Валенсия',g:'остекленная',c:'серый',coat:'эмаль',i:B+'fca39d363db373569715c1841bdc9d28.png?itok=jI68PxXl'},
+  {m:'Валенсия',g:'остекленная',c:'белый',coat:'эмаль',i:B+'6aaa78f04b8d44ff1aa955afcc30e15c.jpg?itok=N514M033'},
+  {m:'Валенсия',g:'глухая',c:'голубой',coat:'эмаль',i:B+'3f2910af4d3cd49b929788746f29f706.png?itok=1anObhOI'},
+  {m:'Валенсия',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'cea09b753a95acc9b6526de19c3eb0c1.png?itok=CTcO79KP'},
+  {m:'Валенсия',g:'глухая',c:'серый',coat:'эмаль',i:B+'f072b58196f2d45432f5a2c85acd8c6b.png?itok=aJrR-dgt'},
+  {m:'Валенсия',g:'глухая',c:'белый',coat:'эмаль',i:B+'8196863a145064d780b60351c4cb3dd1.gif?itok=49mmzjYo'},
+  {m:'Валенсия',g:'остекленная',c:'темный',coat:'бейц',i:B+'eda638efcb428647d63994a4a5586f46.png?itok=ekg9rSBl'},
+  {m:'Валенсия',g:'глухая',c:'натуральный',coat:'бейц',i:B+'a89950fe6ca8e1cbba3617683057fb32.png?itok=Lxlmq4xH'},
+  {m:'Валенсия',g:'глухая',c:'темный',coat:'бейц',i:B+'cdb1cd57617966c3630c82433367a81e.jpg?itok=LjcVgYtW'},
+  {m:'Валенсия',g:'остекленная',c:'серый2',coat:'бейц',i:B+'12f3cfe4d073484c26dc1b824bdf2760.png?itok=XNaXXge5'},
+  {m:'Валенсия',g:'глухая',c:'серый2',coat:'бейц',i:B+'edd7f33dab83f35c1e6f35419f91ae33.png?itok=RitjeFIU'},
+  {m:'Валенсия',g:'остекленная',c:'темный2',coat:'бейц',i:B+'504e18e2335128124d213a93b433e57b.png?itok=T97BmKX6'},
+  {m:'Валенсия',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'a268c302769197c20c4e042d777d7bb1.png?itok=CLMCDACF'},
+  {m:'Валенсия',g:'глухая',c:'бордовый',coat:'бейц',i:B+'1c9d45f4f650f0814dda6255d2152245.png?itok=jIb7jlAC'},
+  {m:'Валенсия',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'f12186ab17422f1cb657fa072937cfbf.png?itok=CxzHQ2cD'},
+  {m:'Валенсия',g:'глухая',c:'темный2',coat:'бейц',i:B+'c58e6b6ae2a0ea5ffb794ace883c234a.png?itok=0c4RZ8Np'},
+  {m:'Валенсия',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'13d3807d4ac29a460f3b8aec6db55c05.png?itok=thgXX1_y'},
+  {m:'Валенсия',g:'глухая',c:'коричневый',coat:'бейц',i:B+'e3edee5702d02dd4404bf4ebb186ef75_0.png?itok=UTXUsBoH'},
+  // ТУРИН
+  {m:'Турин',g:'остекленная',c:'серый',coat:'эмаль',i:B+'db1f1ad5e3e37fbf2bc8c9f4c89545ed.png?itok=S8JEE2j8'},
+  {m:'Турин',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'f845a67f0e8445a7a665c0fd53e5c47a.png?itok=_rjNsffZ'},
+  {m:'Турин',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'41de380ae7902d000b3bc9cd9616b0d5.png?itok=kB3XI71o'},
+  {m:'Турин',g:'остекленная',c:'слоновая кость',coat:'эмаль',i:B+'b17ac121c69da382d0e64ab0093b1eeb.png?itok=CZp0bWAl'},
+  {m:'Турин',g:'глухая',c:'голубой',coat:'эмаль',i:B+'1b97a9e198d82598abfc22914dd17792.png?itok=KQSQI3Yj'},
+  {m:'Турин',g:'глухая',c:'серый',coat:'эмаль',i:B+'63a2b22c08e4648e2ab3397ff281bb47.png?itok=2w8Q7Wee'},
+  {m:'Турин',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'44d70c2d30a703baee96dfc0be2e3fba.png?itok=YQvsWcv3'},
+  {m:'Турин',g:'глухая',c:'слоновая кость',coat:'эмаль',i:B+'13fe6ded7a8e700db7e0120c58c3e3dc.png?itok=iV8ZEB5b'},
+  {m:'Турин',g:'глухая',c:'коричневый',coat:'бейц',i:B+'68eda9560ca91b93f7050578eb8e5f80.png?itok=j1e_vv22'},
+  {m:'Турин',g:'глухая',c:'серый2',coat:'бейц',i:B+'b96c7fcef16dbd44fb48f413dffc344b.png?itok=eJ7OAK5i'},
+  // ЛЕО
+  {m:'Лео',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'822ea56e2b84a8cfd162d7a2668bdac1.jpg?itok=2tF4MWOq'},
+  {m:'Лео',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'d548065298024bb5f9ed3b28a7f66068.png?itok=zPNVxLni'},
+  {m:'Лео',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'4d7161a04318d1fb5fd8e84c0c87996c.jpg?itok=YyltxQXc'},
+  {m:'Лео',g:'глухая',c:'кремовый2',coat:'эмаль',i:B+'2855f30b9efea95324e89cf1eb0d45b4.png?itok=bOXk_SwG'},
+  {m:'Лео',g:'глухая',c:'голубой',coat:'эмаль',i:B+'21cf054d6cfce045daf958ef1a0e31e4.png?itok=YVbLPvQa'},
+  {m:'Лео',g:'глухая',c:'серый',coat:'эмаль',i:B+'70c324eeb918241fbedac20140e461de.png?itok=sC3QuWNX'},
+  {m:'Лео',g:'глухая',c:'белый',coat:'эмаль',i:B+'6522f7505bede8578c9a4de1ed789ea0.png?itok=1mw3QwqB'},
+  {m:'Лео',g:'глухая',c:'слоновая кость',coat:'эмаль',i:B+'dcce167947392b04bad231cd8bd411c8.jpg?itok=ID6arfmp'},
+  {m:'Лео',g:'остекленная',c:'серый',coat:'эмаль',i:B+'7d7e1d004da95d2f064bad3893ce5312.png?itok=CppO4Z_Q'},
+  {m:'Лео',g:'остекленная',c:'белый',coat:'эмаль',i:B+'af868ed58727342f33e343922f210e62.png?itok=8cpiI4Kw'},
+  {m:'Лео',g:'остекленная',c:'слоновая кость',coat:'эмаль',i:B+'db07822197ff51c7bbaa61b171ba6205.jpg?itok=pAwHJli_'},
+  {m:'Лео',g:'глухая',c:'натуральный',coat:'бейц',i:B+'fdfbe640ff68e4e5db9ab4e006e5f03c.png?itok=3jjWtl0x'},
+  {m:'Лео',g:'глухая',c:'коричневый',coat:'бейц',i:B+'36879069493d1653333221d07db39797.png?itok=AZ6NeBaE'},
+  {m:'Лео',g:'глухая',c:'темный',coat:'бейц',i:B+'2b4d5262250e2d5e438531e271f2f63f.png?itok=c0ECSaso'},
+  {m:'Лео',g:'остекленная',c:'темный',coat:'бейц',i:B+'2f4a581dd941792fe2295a5e4285b231.png?itok=Y9WcawP1'},
+  {m:'Лео',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'330a917cae50bb459b2d804379f171cd.png?itok=5OzbzAeJ'},
+  {m:'Лео',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'01eba7f8e6758300f76969815836dd00.png?itok=DpCPUNxQ'},
+  {m:'Лео',g:'остекленная',c:'темный2',coat:'бейц',i:B+'77b6262a40f9fb19c2ba478306952844.jpg?itok=Sa_7EsUk'},
+  {m:'Лео',g:'остекленная',c:'темный3',coat:'бейц',i:B+'8fa5b6dc9395b293344e4788c862e7fd.jpg?itok=U5T-GZE0'},
+  // БАРРОУ
+  {m:'Барроу',g:'остекленная',c:'белый',coat:'эмаль',i:B+'%D0%91%D0%B0%D1%80%D1%80%D0%BE%D1%83-%D0%B1%D0%B5%D0%BB%D1%8B%D0%B9-%D0%B3%D0%BB.png?itok=IzJT5LZ2'},
+  {m:'Барроу',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'e314879b57a9aaf3b1ee650c290e31b0.jpg?itok=f4c44ola'},
+  {m:'Барроу',g:'глухая',c:'кремовый2',coat:'эмаль',i:B+'ce4c731aa3284860954b52381cfe09fc.png?itok=BHVa6usZ'},
+  {m:'Барроу',g:'глухая',c:'голубой',coat:'эмаль',i:B+'12d80bb3d8053a9d6831e85ec824024d.png?itok=C2DjZpgb'},
+  {m:'Барроу',g:'глухая',c:'белый',coat:'эмаль',i:B+'a4431175cfd431ca0d2692cf1c489aed.png?itok=Mw9Yi-AD'},
+  {m:'Барроу',g:'глухая',c:'серый',coat:'эмаль',i:B+'c51224ce98e9cff1a04ef1690b9e2c95.png?itok=Dfwkvc_X'},
+  {m:'Барроу',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'10d77bf169fb21fa95011b96a973a2fe.png?itok=5EBocWo9'},
+  {m:'Барроу',g:'остекленная',c:'слоновая кость',coat:'эмаль',i:B+'1e8f522f20386530335bb9b250c4ca5a.png?itok=3EjLhlLb'},
+  {m:'Барроу',g:'остекленная',c:'серый',coat:'эмаль',i:B+'edd4f9ea182a8e11d48f38f0da85a014.png?itok=qoDelmUE'},
+  {m:'Барроу',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'1cc1550fb2193f4d165eb9b4e5c67da8.png?itok=TfEJL45_'},
+  {m:'Барроу',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'998e29029fa1bf67969ca1abbbd02e8e.png?itok=Y3LdbMWb'},
+  {m:'Барроу',g:'остекленная',c:'серый2',coat:'бейц',i:B+'a13403685a7893d74b675e868e4e97c6.png?itok=xI0ypar3'},
+  {m:'Барроу',g:'остекленная',c:'темный',coat:'бейц',i:B+'71caa7d765a6ba2675dc050aef9533a7.png?itok=m4KIWjFC'},
+  // НОРИДЖ
+  {m:'Норидж',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'de164eae01a1866ef25a4f3a54435ff1.png?itok=5aYTPmJs'},
+  {m:'Норидж',g:'глухая',c:'кремовый2',coat:'эмаль',i:B+'a16c8ee96d4940bbf396dada18987a77.png?itok=qjp9ehvK'},
+  {m:'Норидж',g:'глухая',c:'голубой',coat:'эмаль',i:B+'ec53ca554a0e352d1ed9a651ed424276.png?itok=u8cC28dT'},
+  {m:'Норидж',g:'глухая',c:'серый',coat:'эмаль',i:B+'8ca9442466785947d7bfb11214507733.png?itok=S6bBsJAt'},
+  {m:'Норидж',g:'глухая',c:'белый',coat:'эмаль',i:B+'743883a50703ce3f692ba0a5a87aab1e.png?itok=xEEeb5-b'},
+  {m:'Норидж',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'04f4315921f25abfbe78e94d9c47217e.png?itok=uckL0vPJ'},
+  {m:'Норидж',g:'остекленная',c:'кремовый2',coat:'эмаль',i:B+'a059193761cbfd27437b2583e04bc0bc.png?itok=tl6elDSU'},
+  {m:'Норидж',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'a20069e71770c33c2d8fadc696b60369.png?itok=MaLqBs7b'},
+  {m:'Норидж',g:'остекленная',c:'серый',coat:'эмаль',i:B+'b47c264fa6c201710163e351153a1291.png?itok=PiZrHWoH'},
+  {m:'Норидж',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'843687107f00dea00aca16e858cf55d5.png?itok=KaK9dpfQ'},
+  {m:'Норидж',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'de6ca64568fd11ea80f5000c29359ed1_2592bc99954611ecbbe8000c29ead65d.jpg?itok=ZWuL1ckA'},
+  // ФОБОРГ
+  {m:'Фоборг',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'b222aa098745af1ac1970197d32100d2.jpg?itok=3StDVXMZ'},
+  {m:'Фоборг',g:'глухая',c:'темный',coat:'эмаль',i:B+'f68b9d9cb03d7afae862b512643d73dc.jpg?itok=Yy3sd1RR'},
+  {m:'Фоборг',g:'глухая',c:'голубой',coat:'эмаль',i:B+'2892aad6301515fb5aa83b16c8920f35.png?itok=-coMrJdV'},
+  {m:'Фоборг',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'a430cdec9c865d27f0e823443451d795.png?itok=j7Mpx6qJ'},
+  {m:'Фоборг',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'8790342d654f58f3baa0b9429916560c.png?itok=o2JdcKEt'},
+  {m:'Фоборг',g:'глухая',c:'кремовый2',coat:'эмаль',i:B+'1d9e4188d742098657d0fabb5a0de813.png?itok=ctIEPt-G'},
+  {m:'Фоборг',g:'остекленная',c:'серый',coat:'эмаль',i:B+'ca4b6f3f9e768ea05d6d4ba87d43f859.png?itok=-EgEFER7'},
+  {m:'Фоборг',g:'остекленная',c:'белый',coat:'эмаль',i:B+'35e1bc622dc4644d20d5d5a30069064c.jpg?itok=dUdYh_bN'},
+  {m:'Фоборг',g:'глухая',c:'серый',coat:'эмаль',i:B+'3147104949a3cd306f136d897612136b.png?itok=s1q1F3Py'},
+  {m:'Фоборг',g:'глухая',c:'белый',coat:'эмаль',i:B+'dbae63d99b737144d6cd8704556288ca.jpg?itok=0zju5H3s'},
+  {m:'Фоборг',g:'остекленная',c:'кремовый2',coat:'эмаль',i:B+'6cf3a4c58636b3ab5410363756f69db5.png?itok=_bC2yDqt'},
+  {m:'Фоборг',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'601661ce0a1e48f825eeaff936e649d8.jpg?itok=mFvbVkKq'},
+  {m:'Фоборг',g:'глухая',c:'коричневый',coat:'бейц',i:B+'efe95db422b7734d2fd7ef2a6240bc4b.jpg?itok=mwO_g7Ga'},
+  // БРИСТОЛЬ
+  {m:'Бристоль',g:'остекленная',c:'темный',coat:'эмаль',i:B+'54dcb039a445ca71f4385282d729bda7.jpg?itok=TB1pNca7'},
+  {m:'Бристоль',g:'глухая',c:'белый',coat:'эмаль',i:B+'45b3243065c00d11619afd169c2a2f14.jpg?itok=Lljc-2QA'},
+  {m:'Бристоль',g:'глухая',c:'белый2',coat:'эмаль',i:B+'d8a18a7468860dbe6fb65f365a8c2fe8.png?itok=GtTZtwQb'},
+  {m:'Бристоль',g:'остекленная',c:'белый',coat:'эмаль',i:B+'7158d44b15901513847c78fe2e4890ca.png?itok=jQggEQkF'},
+  // СОЛО
+  {m:'Соло',g:'остекленная',c:'белый',coat:'эмаль',i:B+'3ad679e9308e7622e6aaf006d52f9a35.png?itok=15YD84Qp'},
+  {m:'Соло',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'2502c288dfcad62e02d173bd0dce4881.png?itok=QTQ0MYtt'},
+  {m:'Соло',g:'остекленная',c:'кремовый2',coat:'эмаль',i:B+'dbe81b51f2033bc2221803f8cc55142a.png?itok=eIDuESrt'},
+  {m:'Соло',g:'остекленная',c:'серый',coat:'эмаль',i:B+'8aa2cd020c2c9aef4fd45ea9b772f4a3.png?itok=aKt29e5a'},
+  {m:'Соло',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'1433f0315bd8b314d72b02636a655932.png?itok=SIjWOXG8'},
+  {m:'Соло',g:'остекленная',c:'темный',coat:'бейц',i:B+'3cda71a20db111ee49fbcfafb131f7e1.png?itok=PDPcrq7H'},
+  {m:'Соло',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'e76cb08018aabffb335c041cecb4be4d.png?itok=InYME0Qh'},
+  // ДАЯНА
+  {m:'Даяна',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'eb6d4de32379501392cdb29e9cf7516b.png?itok=M-Wk8ldg'},
+  {m:'Даяна',g:'глухая',c:'кремовый2',coat:'эмаль',i:B+'a46c4b0e1918b0148ef702c30c3e91e4.png?itok=WU-1st7j'},
+  {m:'Даяна',g:'глухая',c:'серый',coat:'эмаль',i:B+'8b235116b259d3dc9495cff676afb920.png?itok=EMQMtJlo'},
+  {m:'Даяна',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'6c151f2f395026e91ff647e83edd7037.png?itok=ZgTncp73'},
+  {m:'Даяна',g:'остекленная',c:'серый',coat:'эмаль',i:B+'d47b3c46ab0454d24b5daa26b3d67055.png?itok=puSLriyX'},
+  // АРИСТОКРАТ №1
+  {m:'Аристократ №1',g:'глухая',c:'темный',coat:'бейц',i:B+'5c161a4bb799b734c46c800f9e6fe907.png?itok=upLVoZkL'},
+  {m:'Аристократ №1',g:'глухая',c:'коричневый',coat:'бейц',i:B+'63f1e620e640b41974d367f2325e734d.png?itok=VgR_lfc3'},
+  {m:'Аристократ №1',g:'глухая',c:'бордовый',coat:'бейц',i:B+'56c038462f88da0939f8df5296ab29bb.png?itok=w9T8Va2D'},
+  {m:'Аристократ №1',g:'глухая',c:'натуральный',coat:'бейц',i:B+'3f247a8d065522172268a1b628dcb819.png?itok=Khbrq9gQ'},
+  {m:'Аристократ №1',g:'глухая',c:'серый',coat:'бейц',i:B+'8bf81c15ade041d6d7687b06db078f86.png?itok=bdc37erz'},
+  // АРИСТОКРАТ №2
+  {m:'Аристократ №2',g:'остекленная',c:'темный',coat:'бейц',i:B+'8a6c8bf9c8db6667080aca3465281f37.png?itok=5iRRKQVc'},
+  {m:'Аристократ №2',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'c2b8a78b957225f4ddf901b6eb41976f.png?itok=SYOCXCPu'},
+  {m:'Аристократ №2',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'f9089467293b981e9dfd04315a44fc52.png?itok=yoMTqV3b'},
+  {m:'Аристократ №2',g:'остекленная',c:'серый',coat:'бейц',i:B+'03cb65684adb6c82053352961634f0d4.png?itok=95p7R_e3'},
+  {m:'Аристократ №2',g:'остекленная',c:'темный2',coat:'бейц',i:B+'6e62ee2575fbe3a30b3d3416dcc54f96.png?itok=xPsd54uL'},
+  // АРИСТОКРАТ №3
+  {m:'Аристократ №3',g:'остекленная',c:'темный',coat:'бейц',i:B+'631ef7505cffc3002a33927344a22b7a.png?itok=8F6ZzDcd'},
+  {m:'Аристократ №3',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'9bd5081861a0fff8d41c41967c0f5468.png?itok=ja-gk_cq'},
+  {m:'Аристократ №3',g:'остекленная',c:'серый',coat:'бейц',i:B+'6b47e7c95524ae380764529d3787942c.png?itok=aSQz3qna'},
+  {m:'Аристократ №3',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'d54e13e23b1b7f6cbbb38dacc473d44f.png?itok=RJNo3kws'},
+  {m:'Аристократ №3',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'fd5f145ea5bed34f890c7dbbc256352c.png?itok=xkWbPenx'},
+  {m:'Аристократ №3',g:'остекленная',c:'темный2',coat:'бейц',i:B+'e20d990e6e47d236c593400231055c82.png?itok=BrmDGWLB'},
+  // АРИСТОКРАТ №4
+  {m:'Аристократ №4',g:'остекленная',c:'темный',coat:'бейц',i:B+'2740a1932e2f04e2ed79cd687b120663.png?itok=JHPiOqDh'},
+  {m:'Аристократ №4',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'e4c5eb1592ab9281f78a38c1e8382798.png?itok=cWmct_wR'},
+  {m:'Аристократ №4',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'a9281cee70cba67225abb498fbc9a532.png?itok=rkEjBRzs'},
+  {m:'Аристократ №4',g:'остекленная',c:'серый',coat:'бейц',i:B+'b57086a25c4382bb180b1baa15d7a750.png?itok=dWB0TuY-'},
+  {m:'Аристократ №4',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'6001cd0412e03d5ac823982fac2c0a00.png?itok=nEeer9ZJ'},
+  {m:'Аристократ №4',g:'остекленная',c:'темный2',coat:'бейц',i:B+'5c84a08f2add8cebcf8f5414c78d2cf9.png?itok=-Q9WB8Nc'},
+  // АРИСТОКРАТ №5
+  {m:'Аристократ №5',g:'остекленная',c:'темный',coat:'бейц',i:B+'a9eb42a2e720a8d54ff7610adac00d7f.png?itok=tTUa7Qbb'},
+  {m:'Аристократ №5',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'8aae3b29a34af649b22e7e34791c3c63.png?itok=emEPIlMz'},
+  {m:'Аристократ №5',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'581681b56bdba3be0681f8f45126ef95.png?itok=GtXALuNL'},
+  {m:'Аристократ №5',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'6e6cf6b5102e9ca1d35228d6ddc5bec2.png?itok=YWj1G5gI'},
+  {m:'Аристократ №5',g:'остекленная',c:'серый',coat:'бейц',i:B+'047404ef9d72437fe480dd6b587f1d85.png?itok=Y8lLpVlz'},
+  {m:'Аристократ №5',g:'остекленная',c:'темный2',coat:'бейц',i:B+'6178185c55f8115cb62feadf938d4cb8.png?itok=jZX3LPwA'},
+  // АРИСТОКРАТ №6
+  {m:'Аристократ №6',g:'остекленная',c:'темный',coat:'бейц',i:B+'ecdcfcb719385042c4ee3ae371864775.png?itok=lhkcelVe'},
+  {m:'Аристократ №6',g:'остекленная',c:'серый',coat:'бейц',i:B+'1a39556b40a43102b59fc31650bb5b23.png?itok=qD195Zhg'},
+  {m:'Аристократ №6',g:'остекленная',c:'бордовый',coat:'бейц',i:B+'a68c95e2f0c2285244189439d7ee3bbc.png?itok=9g6D36vo'},
+  {m:'Аристократ №6',g:'остекленная',c:'натуральный',coat:'бейц',i:B+'7295c86b5d59605f937b650824444a1f.png?itok=TSJThHg1'},
+  {m:'Аристократ №6',g:'остекленная',c:'коричневый',coat:'бейц',i:B+'3e82dde6a55f4b4e6babce9a22e574df.png?itok=0-A1jXhw'},
+  {m:'Аристократ №6',g:'остекленная',c:'темный2',coat:'бейц',i:B+'0eb725a0fd9ea1b5f208347b7ea9dca0.png?itok=-mNWcUiT'},
+  // ВЕНЕЦИЯ
+  {m:'Венеция (патина)',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'565001e8457d11a8c9f2f1e2cb504412.jpg?itok=5FhnMq_8'},
+  {m:'Венеция (патина)',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'296fa380f6876f4a943420fc21d3d9ab.jpg?itok=yb9XY8Qv'},
+  // АРИСТОКРАТ (без номера)
+  {m:'Аристократ',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'fdffd6222588a210a708463983de98db_0.jpg?itok=n6_g9irI'},
+  // СОФИЯ
+  {m:'София',g:'остекленная',c:'кремовый',coat:'эмаль',i:B+'bcb439a958017979b41e6aec8d5f402c.jpg?itok=YV30GuDi'},
+  {m:'София',g:'остекленная',c:'слоновая кость',coat:'эмаль',i:B+'14500b2c253fc68e07c813623a9f8b96.jpg?itok=vGvGeSIp'},
+  {m:'София',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'347fb10bacdd99fd9b4b80fb0d2366bc.png?itok=dI-UniVF'},
+  {m:'София',g:'остекленная',c:'белый',coat:'эмаль',i:B+'f2c8b43dfa7c5c412fedccf79d0441d4.jpg?itok=2R5W2A0h'},
+  {m:'София',g:'остекленная',c:'серый',coat:'эмаль',i:B+'db510e79a6b661bf94960aaa5ea253ff.jpg?itok=cRYn5D90'},
+];
+
+const sosna=[
+  // ТУРИН
+  {m:'Турин',g:'глухая',c:'кремовый',coat:'эмаль+лак',i:B+'ea48e83fb89a57749cce5eb038c7651e.png?itok=PNNmKcAn'},
+  {m:'Турин',g:'глухая',c:'голубой',coat:'эмаль+лак',i:B+'ec0913e38b862e794e2e646771e45ed5.png?itok=b41EjjJ2'},
+  {m:'Турин',g:'глухая',c:'серый',coat:'эмаль+лак',i:B+'84c5ebc8ba25713b52f93cc5429770a0.png?itok=_ypWFKYl'},
+  {m:'Турин',g:'глухая',c:'белый',coat:'эмаль+лак',i:B+'e172ceec0be19cc497381c64853163ff.png?itok=Djr6FfFe'},
+  {m:'Турин',g:'глухая',c:'слоновая кость',coat:'эмаль+лак',i:B+'2769c19cf7702bc70d234eac5ae3a822.png?itok=RIWKFml4'},
+  {m:'Турин',g:'остекленная',c:'слоновая кость',coat:'эмаль+лак',i:B+'ea7e2b5e8c7a2cdb8ee7b1ec64e3ebb6.png?itok=5QgOHxpd'},
+  // СОРЕНТО
+  {m:'Соренто',g:'остекленная',c:'кремовый',coat:'эмаль+лак',i:B+'aaed4694b929aec2948e85f0911dbc17.png?itok=gDtN8JMa'},
+  {m:'Соренто',g:'остекленная',c:'серый',coat:'эмаль+лак',i:B+'e4cb0fad4c2fe447e45baed02a701415.png?itok=a1Oa1RcL'},
+  {m:'Соренто',g:'глухая',c:'серый',coat:'эмаль+лак',i:B+'850bceedfa813d6d7953238fb9dca9a3.png?itok=coRdfuGi'},
+  {m:'Соренто',g:'глухая',c:'кремовый',coat:'эмаль+лак',i:B+'e64e67224f5feb8f050a597450d0b1b6.png?itok=4dlqukSV'},
+  {m:'Соренто',g:'глухая',c:'голубой',coat:'эмаль+лак',i:B+'644c3e4d909a23da42d3977af7838584.png?itok=pybIwVOs'},
+  {m:'Соренто',g:'остекленная',c:'голубой',coat:'эмаль+лак',i:B+'38abf7b2914bc703f9578a6fdb66d5e0.png?itok=gBjUWNIC'},
+  {m:'Соренто',g:'глухая',c:'белый',coat:'эмаль+лак',i:B+'c247c5538365949a8db1ea548938e571.png?itok=EA6yLRnS'},
+  {m:'Соренто',g:'глухая',c:'слоновая кость',coat:'эмаль+лак',i:B+'b7814e9d50212accf9bef1dabf48b719.png?itok=a6cRQqkN'},
+  {m:'Соренто',g:'остекленная',c:'слоновая кость',coat:'эмаль+лак',i:B+'84d60c39a8b69023d1177d3b7330de3c.png?itok=GWzxD8g5'},
+  {m:'Соренто',g:'остекленная',c:'белый',coat:'эмаль+лак',i:B+'47ba46cc71cb1a636137b15e1daefe05.png?itok=yl0BU3xF'},
+  // ВАЛЕНСИЯ (сосна)
+  {m:'Валенсия',g:'остекленная',c:'голубой',coat:'эмаль',i:B+'310d5def888922813ae7586e4071ff36.png?itok=Ace7B2yd'},
+  {m:'Валенсия',g:'глухая',c:'темный',coat:'бейц+лак',i:B+'d479e5885ee0a55ee54cf0ae94149476.png?itok=39ogJcz2'},
+  // ЭЛЕГИЯ (сосна)
+  {m:'Элегия',g:'остекленная',c:'голубой',coat:'эмаль+лак',i:B+'e45f2e8bca04006f4de5eb85f60de174.png?itok=JnmJF6Rl'},
+  {m:'Элегия',g:'глухая',c:'голубой',coat:'эмаль',i:B+'a43bb78805567872cc0b3d1db6341639.png?itok=usw4M0Vv'},
+  {m:'Элегия',g:'остекленная',c:'серый',coat:'эмаль+лак',i:B+'69b08948660723f585f08c0403cad93b.png?itok=jmpqnJUS'},
+  {m:'Элегия',g:'остекленная',c:'кремовый',coat:'эмаль+лак',i:B+'605bacb119c00febebc0690e731ea6a8.png?itok=k_oZ3hra'},
+  {m:'Элегия',g:'глухая',c:'кремовый',coat:'эмаль',i:B+'3c4d87d1ec5be833c6a7003cbfd18c18.png?itok=lw9bbxwE'},
+  {m:'Элегия',g:'глухая',c:'слоновая кость',coat:'эмаль',i:B+'0d53f6ed1728c7468fe27c9f52c2b102.png?itok=9DNrvO3h'},
+  {m:'Элегия',g:'глухая',c:'серый',coat:'эмаль',i:B+'d972ebc828fa460c84b4207f192f71cb.png?itok=oog00U5K'},
+  {m:'Элегия',g:'остекленная',c:'белый',coat:'эмаль',i:B+'9b2eae798fe08e08afb881cf946970ae.png?itok=mjhgvvSE'},
+  {m:'Элегия',g:'остекленная',c:'слоновая кость',coat:'эмаль+лак',i:B+'c6011ec5d5b27a01d9e766cf6a73ca2f.png?itok=a4uhSv3m'},
+  {m:'Элегия',g:'глухая',c:'белый',coat:'эмаль',i:B+'c3b05f5b33c1bfc5ae2fd3077510e017.png?itok=R2929sOE'},
+  // ЛЕО (сосна)
+  {m:'Лео',g:'остекленная',c:'слоновая кость',coat:'бейц+лак',i:B+'47cb2eb30d5877fd5884e5891a507da3.png?itok=TBDysCgq'},
+  {m:'Лео',g:'глухая',c:'коричневый',coat:'бейц+лак',i:B+'4d0da2b481be9c2e06d5f9952f672f92.png?itok=DLcbHhnM'},
+  {m:'Лео',g:'глухая',c:'слоновая кость',coat:'бейц+лак',i:B+'db02fa90758fa98a1e6c265e65d9e2cd.png?itok=X0Musk1v'},
+  {m:'Лео',g:'остекленная',c:'кремовый',coat:'бейц+лак',i:B+'5df683cfdbe0b301ab7f068c85da5471.png?itok=Hu-1zMCQ'},
+  {m:'Лео',g:'остекленная',c:'коричневый',coat:'бейц+лак',i:B+'e44fa188e987f65dc7cd9d7142c7bb27.png?itok=elE2Nk5v'},
+  {m:'Лео',g:'глухая',c:'кремовый',coat:'бейц+лак',i:B+'cf5c12452fbacaad7d1045645f67baa9.png?itok=Vb4qEwtc'},
+  // ОСЛО
+  {m:'Осло',g:'глухая',c:'натуральный',coat:'бейц+лак',i:B+'97f1a2cd87b02e5e47dc147402f7f77e.png?itok=PF4qOjF7'},
+  {m:'Осло',g:'глухая',c:'белый',coat:'бейц+лак',i:B+'c2bc82defa5bddba44844e38c6676201.png?itok=o2d-H9Gi'},
+  // ОСЛО-2
+  {m:'Осло-2',g:'глухая',c:'коричневый',coat:'бейц+лак',i:B+'643499ec82b61669e81577a6d4407c13.png?itok=2NnsVrqQ'},
+  // НАРВИК
+  {m:'Нарвик',g:'глухая',c:'натуральный',coat:'бейц+лак',i:B+'58ba0411004827e91dcc5aaf53bdfe57.png?itok=I_h5jmRN'},
+  // ЭТНЕ
+  {m:'Этне',g:'остекленная',c:'натуральный',coat:'бейц+лак',i:B+'7a4ecdbfd2eedcdff5b04484c8fbb9f3.png?itok=wC61IP5K'},
+  {m:'Этне',g:'глухая',c:'серый',coat:'бейц+лак',i:B+'90a90bdafc16112adbfa788fea11f3e9.png?itok=iyPR1bBu'},
+  {m:'Этне',g:'глухая',c:'белый',coat:'бейц+лак',i:B+'d17baa61b57e36ef176c97ee26ffcc99.png?itok=H1zPFPKh'},
+  // РЕТРО
+  {m:'Ретро',g:'остекленная',c:'коричневый',coat:'бейц+лак',i:B+'de602071254b3cf73718b621d3b6c0f1.png?itok=5awL1feH'},
+  {m:'Ретро',g:'глухая',c:'коричневый',coat:'бейц+лак',i:B+'6087d26551108c38e0446a1e6ca96a72.png?itok=aQghkYzO'},
+  // ДОРОТЕА
+  {m:'Доротеа',g:'глухая',c:'коричневый',coat:'бейц+лак',i:B+'93114a8a861ab7fe59465ba1086f1886.png?itok=Smvpv-t4'},
+  {m:'Доротеа',g:'глухая',c:'натуральный',coat:'браширование',i:B+'5cf5f2877698a4379068d487f112c249.png?itok=mNiCK6RD'},
+  // АЛЬТА-2
+  {m:'Альта-2',g:'остекленная',c:'серый',coat:'браширование',i:B+'9862b06ed53c4bed901c5b3a0e4fb30d.png?itok=lZc8aYtq'},
+  {m:'Альта-2',g:'остекленная',c:'белый',coat:'браширование',i:B+'0ed78716c63b93b331a32dc7d05d11c9.jpg?itok=cfVUR518'},
+];
+
+// ===== ЛОГИКА =====
+const CLR={
+  'белый':'#f4f4f4','белый2':'#eef0f2','кремовый':'#e8d080','кремовый2':'#d8bc50',
+  'натуральный':'#c8a055','коричневый':'#7a4818','темный':'#2a1606','темный2':'#1e1006','темный3':'#160a04',
+  'бордовый':'#6e1515','серый':'#909090','серый2':'#686868','голубой':'#6a9ab8',
+  'слоновая кость':'#f0e8d0','зеленый':'#5a8055','браширование':'#9a7840'
+};
+
+let mat='olkha', fGlass='all';
+let currentPage=1, perPage=24;
+const acl={};
+let mModel='';
+
+function data(){return mat==='olkha'?olkha:sosna;}
+
+function group(){
+  const g={};
+  data().forEach(v=>{if(!g[v.m])g[v.m]=[];g[v.m].push(v);});
+  return g;
+}
+
+function filteredModels(){
+  const G=group();
+  const models=Object.keys(G).filter(m=>{
+    if(fGlass!=='all' && !G[m].some(v=>v.g===fGlass)) return false;
+    return true;
+  });
+  return models;
+}
+
+function render(){
+  const models=filteredModels();
+  const total=models.length;
+  document.getElementById('cNum').textContent=total;
+  document.getElementById('cLbl').textContent=total===1?'модель':total<5?'модели':'моделей';
+
+  const totalPages=Math.ceil(total/perPage)||1;
+  if(currentPage>totalPages) currentPage=totalPages;
+  const start=(currentPage-1)*perPage;
+  const end=Math.min(start+perPage,total);
+  const pageModels=models.slice(start,end);
+
+  const grid=document.getElementById('grid');
+  if(!pageModels.length){grid.innerHTML='<div class="nores">Ничего не найдено</div>';}
+  else {
+    const G=group();
+    const matL=mat==='olkha'?'Массив ольхи':'Массив сосны';
+    grid.innerHTML=pageModels.map(m=>{
+      const all=G[m];
+      const vs=fGlass==='all'?all:all.filter(v=>v.g===fGlass);
+      const uniq=[...new Map(vs.map(v=>[v.c,v])).values()];
+      const key=mat+'_'+m+'_'+fGlass;
+      if(!acl[key]) acl[key]=uniq[0].c;
+      const ac=acl[key];
+      const cur=vs.find(v=>v.c===ac)||vs[0];
+      const bc=cur.g==='глухая'?'bs':cur.g==='остекленная'?'bg':'bp';
+      const bt=cur.g==='глухая'?'Глухая':cur.g==='остекленная'?'Остекл.':'Частично';
+      const sid='c_'+m.replace(/[^a-zA-Zа-яёА-ЯЁ0-9]/g,'_');
+      const sw=uniq.map(v=>`<span class="sw${v.c===ac?' on':''}" style="background:${CLR[v.c]||'#bbb'};${v.c.includes('бел')||v.c==='слоновая кость'?'border-color:#ccc':''}" title="${v.c}" data-m="${m}" data-c="${v.c}"></span>`).join('');
+      return `<div class="card" data-m="${m}" data-cur="${ac}">
+        <div class="photo"><img id="${sid}_img" src="${cur.i}" alt="${m}" loading="lazy"><span class="badge ${bc}" id="${sid}_badge">${bt}</span></div>
+        <div class="cbody">
+          <div class="clabel">${matL}</div>
+          <div class="cname">${m}</div>
+          <div class="swatches">${sw}</div>
+          <div class="swlbl" id="${sid}_lbl">${ac} · ${cur.coat}</div>
+          <div class="cfoot"><button class="bdet" data-m="${m}">Подробнее</button></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Пагинация
+  const pag=document.getElementById('pagination');
+  pag.innerHTML='';
+  if(totalPages>1){
+    const prev=document.createElement('button');
+    prev.className='page-btn'+(currentPage===1?' disabled':'');
+    prev.textContent='‹';
+    prev.dataset.p='prev';
+    pag.appendChild(prev);
+    for(let i=1;i<=totalPages;i++){
+      const btn=document.createElement('button');
+      btn.className='page-btn'+(i===currentPage?' active':'');
+      btn.textContent=i;
+      btn.dataset.p=i;
+      pag.appendChild(btn);
+    }
+    const next=document.createElement('button');
+    next.className='page-btn'+(currentPage===totalPages?' disabled':'');
+    next.textContent='›';
+    next.dataset.p='next';
+    pag.appendChild(next);
+  }
+}
+
+// Обработчики
+document.addEventListener('click', function(e){
+  // Материал
+  const matTab=e.target.closest('.mat-tab');
+  if(matTab){
+    document.querySelectorAll('.mat-tab').forEach(b=>b.classList.remove('on'));
+    matTab.classList.add('on');
+    mat=matTab.dataset.mat;
+    fGlass='all'; currentPage=1;
+    document.querySelectorAll('.tbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
+    render();
+    return;
+  }
+  // Фильтр по типу
+  const tbtn=e.target.closest('.tbtn');
+  if(tbtn){
+    document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+    tbtn.classList.add('on');
+    fGlass=tbtn.dataset.g; currentPage=1; render();
+    return;
+  }
+  // Выбор цвета
+  const sw=e.target.closest('.sw');
+  if(sw){
+    const m=sw.dataset.m, c=sw.dataset.c;
+    const key=mat+'_'+m+'_'+fGlass;
+    acl[key]=c;
+    const G=group();
+    const vs=fGlass==='all'?G[m]:G[m].filter(v=>v.g===fGlass);
+    const v=vs.find(x=>x.c===c)||vs[0];
+    const sid='c_'+m.replace(/[^a-zA-Zа-яёА-ЯЁ0-9]/g,'_');
+    document.getElementById(sid+'_img').src=v.i;
+    document.getElementById(sid+'_lbl').textContent=c+' · '+v.coat;
+    const b=document.getElementById(sid+'_badge');
+    b.className='badge '+(v.g==='глухая'?'bs':v.g==='остекленная'?'bg':'bp');
+    b.textContent=v.g==='глухая'?'Глухая':v.g==='остекленная'?'Остекл.':'Частично';
+    const card=e.target.closest('.card');
+    card.dataset.cur=c;
+    card.querySelectorAll('.sw').forEach(s=>s.classList.toggle('on',s.dataset.c===c));
+    return;
+  }
+  // Кнопка "Подробнее"
+  const det=e.target.closest('.bdet');
+  if(det){
+    const card=det.closest('.card');
+    if(card) openModal(card.dataset.m, card.dataset.cur);
+    return;
+  }
+  // Клик по карточке
+  const card=e.target.closest('.card');
+  if(card && !e.target.closest('.bdet') && !e.target.closest('.sw')){
+    openModal(card.dataset.m, card.dataset.cur);
+    return;
+  }
+  // Пагинация
+  const pageBtn=e.target.closest('.page-btn');
+  if(pageBtn && !pageBtn.classList.contains('disabled')){
+    const p=pageBtn.dataset.p;
+    if(p==='prev') currentPage--;
+    else if(p==='next') currentPage++;
+    else currentPage=parseInt(p,10);
+    render();
+    window.scrollTo({top: document.getElementById('cNum').offsetTop-20, behavior:'smooth'});
+    return;
+  }
+});
+
+// Модальное окно
+function openModal(m,curC){
+  mModel=m;
+  const G=group();
+  renderModal(m,G[m],curC||G[m][0].c);
+  document.getElementById('ov').classList.add('open');
+}
+function renderModal(m,all,curC){
+  const v=all.find(x=>x.c===curC)||all[0];
+  const uniq=[...new Map(all.map(x=>[x.c,x])).values()];
+  const matL=mat==='olkha'?'Массив ольхи':'Массив сосны';
+  document.getElementById('mH').textContent=matL+' · '+m;
+  document.getElementById('mTag').textContent=m;
+  document.getElementById('mName').textContent=m+' · '+v.g;
+  document.getElementById('mImg').src=v.i;
+  document.getElementById('mCLbl').textContent=v.c+' · '+v.coat;
+  document.getElementById('mSwatches').innerHTML=uniq.map(x=>
+    `<span class="msw${x.c===curC?' on':''}" style="background:${CLR[x.c]||'#bbb'};${x.c.includes('бел')||x.c==='слоновая кость'?'border-color:#ccc':''}" title="${x.c}" data-mc="${x.c}"></span>`
+  ).join('');
+  document.getElementById('mSpecs').innerHTML=[
+    ['Материал',matL],['Модель',m],['Тип',v.g],['Покрытие',v.coat],['Цвет',v.c],
+    ['Ширина','600 / 700 / 800 / 900 мм'],['Высота','2000 мм'],['Толщина','40 мм']
+  ].map(([k,val])=>`<tr><td>${k}</td><td>${val}</td></tr>`).join('');
+}
+document.getElementById('mSwatches').addEventListener('click',e=>{
+  const sw=e.target.closest('.msw'); if(!sw) return;
+  const G=group(); renderModal(mModel,G[mModel],sw.dataset.mc);
+});
+document.getElementById('mX').onclick=()=>document.getElementById('ov').classList.remove('open');
+document.getElementById('ov').addEventListener('click',e=>{if(e.target.id==='ov')document.getElementById('ov').classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('ov').classList.remove('open');});
+
+render();
+</script>
+</body>
+</html>
