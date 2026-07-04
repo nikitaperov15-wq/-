@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Каталог дверей из массива ольхи · КОЛОНТЕРБЕЛ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f2ece2;
+  color: #2e2416;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+header {
+  background: linear-gradient(135deg, #4a2e0e 0%, #8b6235 100%);
+  padding: 20px 32px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+header h1 { color: #f5e8d0; font-size: 24px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+header h2 { color: #e8c98a; font-size: 13px; font-weight: 400; letter-spacing: 5px; margin-top: 5px; text-transform: uppercase; }
+
+/* ─── MODEL NAV ─── */
+.model-nav {
+  background: #3a2510;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.model-nav::-webkit-scrollbar { display: none; }
+.model-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #b89060;
+  padding: 13px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.18s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.model-btn:hover { color: #f5e8d0; background: rgba(255,255,255,0.06); }
+.model-btn.active { color: #f5e8d0; border-bottom-color: #e8c98a; }
+
+/* ─── TYPE FILTER ─── */
+.type-bar {
+  background: #faf5ee;
+  border-bottom: 1px solid #ddd0bc;
+  padding: 9px 20px;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.type-bar label { font-size: 12px; color: #9a7a55; font-weight: 600; }
+.type-btn {
+  background: #fff;
+  border: 1px solid #c8b090;
+  color: #6b4c2a;
+  padding: 4px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.type-btn:hover, .type-btn.active { background: #7a5530; color: #fff; border-color: #7a5530; }
+
+/* ─── COUNT ─── */
+.count-bar {
+  text-align: center;
+  padding: 12px 20px 4px;
+  font-size: 13px;
+  color: #8a6a45;
+}
+.count-bar strong { font-size: 20px; color: #3a2510; font-weight: 700; }
+
+/* ─── GRID ─── */
+.grid {
+  display: grid;
+  /* Узкие карточки под вертикальный формат двери */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 18px;
+  padding: 14px 20px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ─── CARD ─── */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(80,50,15,0.10);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(80,50,15,0.18);
+}
+
+/* Фото-зона: padding-top задаёт высоту = соотношение сторон.
+   Реальные фото дверей с oka-dveri.by ≈ 420×640px → ~65% ширины */
+.card-photo {
+  position: relative;
+  width: 100%;
+  padding-top: 152%;   /* 420/640 ≈ 65.6% → инверсия 152% */
+  background: #ece7df;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+}
+.card-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;      /* вся дверь видна, без обрезки */
+  object-position: center bottom; /* прижато к низу — дверь стоит на полу */
+  transition: transform 0.28s;
+}
+.card:hover .card-photo img { transform: scale(1.04); }
+
+/* Бейдж глухая/остекленная */
+.badge {
+  position: absolute;
+  top: 7px; right: 7px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  z-index: 2;
+  pointer-events: none;
+}
+.b-solid   { background: rgba(60,36,10,0.82); color:#fff; }
+.b-glazed  { background: rgba(35,85,130,0.86); color:#fff; }
+.b-partial { background: rgba(50,95,45,0.86);  color:#fff; }
+
+/* Тело карточки */
+.card-body {
+  padding: 10px 11px 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.card-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #b09060;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 2px;
+}
+.card-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2e1a08;
+  margin-bottom: 9px;
+  line-height: 1.25;
+}
+
+/* Цветовые кружки */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.sw {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #d8c8b0;
+  cursor: pointer;
+  transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s;
+  flex-shrink: 0;
+}
+.sw:hover { transform: scale(1.2); border-color: #7a5530; }
+.sw.on {
+  border-color: #7a5530;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #7a5530;
+  transform: scale(1.1);
+}
+.sw-label {
+  font-size: 10px;
+  color: #9a7a55;
+  margin-bottom: 9px;
+  min-height: 13px;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #f0e8d8;
+  margin-top: auto;
+}
+.card-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6b4c2a;
+  line-height: 1.2;
+}
+.card-price small { font-size: 9px; color: #aaa; font-weight: 400; display: block; }
+.btn-detail {
+  background: #7a5530;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+.btn-detail:hover { background: #4a2e0e; }
+
+.no-res {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #a07848;
+  font-size: 16px;
+}
+
+/* ─── MODAL ─── */
+.overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(10,5,0,0.78);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  max-width: 780px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+.modal-head {
+  background: linear-gradient(90deg, #4a2e0e, #8b6235);
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 14px 14px 0 0;
+  flex-shrink: 0;
+}
+.modal-head h2 { color: #f5e8d0; font-size: 16px; font-weight: 600; }
+.modal-x {
+  background: none; border: none;
+  color: rgba(245,232,208,.7);
+  font-size: 26px; cursor: pointer; line-height: 1;
+  transition: color 0.18s;
+}
+.modal-x:hover { color: #f5e8d0; }
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 22px;
+  padding: 20px;
+}
+@media(max-width:560px){ .modal-grid{ grid-template-columns:1fr; } }
+
+/* Фото в модале — такое же соотношение */
+.modal-photo {
+  position: relative;
+  width: 100%;
+  padding-top: 152%;
+  background: #ece7df;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.modal-photo img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  display: block;
+}
+
+.modal-info h3 { font-size: 19px; color: #2e1a08; margin-bottom: 5px; }
+.m-tag {
+  display: inline-block;
+  background: #f0e8d8; color: #7a5530;
+  padding: 2px 11px; border-radius: 10px;
+  font-size: 11px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.m-color-label { font-size: 12px; color: #7a5530; font-weight: 600; min-height: 16px; margin-bottom: 10px; }
+
+.m-swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.m-sw {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid #d8c8b0;
+  cursor: pointer;
+  transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s;
+}
+.m-sw:hover { transform: scale(1.15); border-color: #7a5530; }
+.m-sw.on {
+  border-color: #7a5530;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #7a5530;
+}
+
+.specs { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+.specs td { padding: 6px 0; border-bottom: 1px solid #f5ede0; }
+.specs td:first-child { color: #a07848; width: 42%; font-weight: 500; }
+.specs td:last-child { color: #2e1a08; font-weight: 600; }
+
+.modal-foot {
+  padding: 15px 20px;
+  border-top: 1px solid #f0e8d8;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.m-price { font-size: 21px; font-weight: 700; color: #6b4c2a; }
+.m-price small { font-size: 11px; font-weight: 400; color: #aaa; display: block; }
+.btn-order {
+  background: linear-gradient(135deg, #6b4c2a, #a07848);
+  color: #fff; border: none; border-radius: 9px;
+  padding: 11px 24px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.18s;
+}
+.btn-order:hover { opacity: 0.88; }
+
+@media(max-width:580px){
+  .grid { padding: 10px 10px 30px; gap: 12px; }
+  header { padding: 14px 16px; }
+  header h1 { font-size: 17px; letter-spacing: 2px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Каталог «Колонтербел»</h1>
+  <h2>Двери из массива ольхи · ОКА</h2>
+</header>
+
+<nav class="model-nav" id="modelNav">
+  <button class="model-btn active" data-m="all">Все модели</button>
+  <button class="model-btn" data-m="Лондон-1">Лондон-1</button>
+  <button class="model-btn" data-m="Лондон-2">Лондон-2</button>
+  <button class="model-btn" data-m="Аристократ №1">Аристократ №1</button>
+  <button class="model-btn" data-m="Аристократ №2">Аристократ №2</button>
+  <button class="model-btn" data-m="Аристократ №3">Аристократ №3</button>
+  <button class="model-btn" data-m="Аристократ №4">Аристократ №4</button>
+  <button class="model-btn" data-m="Аристократ №5">Аристократ №5</button>
+  <button class="model-btn" data-m="Аристократ №6">Аристократ №6</button>
+  <button class="model-btn" data-m="Венеция">Венеция</button>
+  <button class="model-btn" data-m="София">София</button>
+</nav>
+
+<div class="type-bar">
+  <label>Тип:</label>
+  <button class="type-btn active" data-g="all">Все</button>
+  <button class="type-btn" data-g="глухая">Глухая</button>
+  <button class="type-btn" data-g="остекленная">Остекленная</button>
+</div>
+
+<div class="count-bar"><strong id="cNum">0</strong> <span id="cLbl">моделей</span></div>
+
+<div class="grid" id="grid"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="mHead">—</h2>
+      <button class="modal-x" id="mClose">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-photo"><img id="mImg" src="" alt=""></div>
+      <div class="modal-info">
+        <div class="m-tag" id="mTag">—</div>
+        <h3 id="mName">—</h3>
+        <div style="font-size:11px;color:#aaa;margin-bottom:6px">Выберите цвет:</div>
+        <div class="m-swatches" id="mSwatches"></div>
+        <div class="m-color-label" id="mColorLabel"></div>
+        <table class="specs" id="mSpecs"></table>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="m-price"><small>Цена от</small><span id="mPrice">—</span></div>
+      <button class="btn-order">Заказать</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const B = 'https://www.oka-dveri.by/sites/default/files/styles/catalog1/public/dveri/2023-06/';
+
+// Все варианты дверей с реальными фото с сайта
+const V = [
+  // ЛОНДОН-1
+  {m:'Лондон-1', g:'глухая',      c:'кремовый',   coat:'эмаль', p:'705 руб.', i:B+'87458ae1a7e46a8bcc7e43f2e9e40c88.jpg?itok=oydRMweD'},
+  {m:'Лондон-1', g:'глухая',      c:'белый',       coat:'эмаль', p:'705 руб.', i:B+'0a4d9bf1c749912007a5f2b4220f8695.jpg?itok=ktSTQBX0'},
+  {m:'Лондон-1', g:'остекленная', c:'кремовый',   coat:'эмаль', p:'705 руб.', i:B+'01a4f295ccdc5b252fd34152d4e556ac.jpg?itok=sTpFwDRy'},
+  {m:'Лондон-1', g:'остекленная', c:'серый',       coat:'эмаль', p:'705 руб.', i:B+'14f57febda2f53b20c6c2f7c6b5c5ed7.JPG?itok=Csdn-qU5'},
+  {m:'Лондон-1', g:'остекленная', c:'белый',       coat:'эмаль', p:'705 руб.', i:B+'2734bd13d1b622c0b2006c3a7a1b87c9.jpg?itok=JIDxxave'},
+  {m:'Лондон-1', g:'остекленная', c:'коричневый', coat:'бейц',  p:'678 руб.', i:B+'3ad72a60cca5f53d8763f26e13bc5d21.jpg?itok=N303uImq'},
+  {m:'Лондон-1', g:'глухая',      c:'коричневый', coat:'бейц',  p:'678 руб.', i:B+'2ee265777e79a7f6239be397326deea6.JPG?itok=x5HhY7w8'},
+  // ЛОНДОН-2
+  {m:'Лондон-2', g:'глухая',      c:'белый',       coat:'эмаль', p:'705 руб.', i:B+'5ff2f2cf01b3774550394c6324d9b958.png?itok=y5O22H3V'},
+  {m:'Лондон-2', g:'остекленная', c:'белый',       coat:'эмаль', p:'705 руб.', i:B+'e3a3c93dc7ef327d95aebda3387abede.png?itok=A6QJX8Xa'},
+  {m:'Лондон-2', g:'глухая',      c:'серый',       coat:'эмаль', p:'705 руб.', i:B+'1c153279c1120ae824735d104169d126.png?itok=JviAaDqf'},
+  {m:'Лондон-2', g:'остекленная', c:'серый',       coat:'эмаль', p:'705 руб.', i:B+'39f7dacbd789f0ed47e47b693fe7d1ac.png?itok=X6OjchwL'},
+  {m:'Лондон-2', g:'глухая',      c:'коричневый', coat:'бейц',  p:'678 руб.', i:B+'158b7bd8bc9b474c2c4d806a3e856296.png?itok=cGV_jiVW'},
+  {m:'Лондон-2', g:'остекленная', c:'коричневый', coat:'бейц',  p:'678 руб.', i:B+'d49b16767a043cc56986c916593b1205.png?itok=eqpP0wkI'},
+  // АРИСТОКРАТ №1
+  {m:'Аристократ №1', g:'глухая', c:'тёмный',     coat:'бейц', p:'652 руб.', i:B+'5c161a4bb799b734c46c800f9e6fe907.png?itok=upLVoZkL'},
+  {m:'Аристократ №1', g:'глухая', c:'коричневый', coat:'бейц', p:'652 руб.', i:B+'63f1e620e640b41974d367f2325e734d.png?itok=VgR_lfc3'},
+  {m:'Аристократ №1', g:'глухая', c:'бордовый',   coat:'бейц', p:'652 руб.', i:B+'56c038462f88da0939f8df5296ab29bb.png?itok=w9T8Va2D'},
+  {m:'Аристократ №1', g:'глухая', c:'натуральный',coat:'бейц', p:'652 руб.', i:B+'3f247a8d065522172268a1b628dcb819.png?itok=Khbrq9gQ'},
+  // АРИСТОКРАТ №2
+  {m:'Аристократ №2', g:'остекленная', c:'тёмный',     coat:'бейц', p:'652 руб.', i:B+'8a6c8bf9c8db6667080aca3465281f37.png?itok=5iRRKQVc'},
+  {m:'Аристократ №2', g:'остекленная', c:'натуральный', coat:'бейц', p:'652 руб.', i:B+'c2b8a78b957225f4ddf901b6eb41976f.png?itok=SYOCXCPu'},
+  {m:'Аристократ №2', g:'остекленная', c:'коричневый',  coat:'бейц', p:'652 руб.', i:B+'f9089467293b981e9dfd04315a44fc52.png?itok=yoMTqV3b'},
+  // АРИСТОКРАТ №3
+  {m:'Аристократ №3', g:'остекленная', c:'тёмный',     coat:'бейц', p:'652 руб.', i:B+'631ef7505cffc3002a33927344a22b7a.png?itok=8F6ZzDcd'},
+  {m:'Аристократ №3', g:'остекленная', c:'натуральный', coat:'бейц', p:'652 руб.', i:B+'9bd5081861a0fff8d41c41967c0f5468.png?itok=ja-gk_cq'},
+  {m:'Аристократ №3', g:'остекленная', c:'серый',       coat:'бейц', p:'652 руб.', i:B+'6b47e7c95524ae380764529d3787942c.png?itok=aSQz3qna'},
+  {m:'Аристократ №3', g:'остекленная', c:'коричневый',  coat:'бейц', p:'652 руб.', i:B+'d54e13e23b1b7f6cbbb38dacc473d44f.png?itok=RJNo3kws'},
+  {m:'Аристократ №3', g:'остекленная', c:'бордовый',    coat:'бейц', p:'652 руб.', i:B+'fd5f145ea5bed34f890c7dbbc256352c.png?itok=xkWbPenx'},
+  // АРИСТОКРАТ №4
+  {m:'Аристократ №4', g:'остекленная', c:'тёмный',     coat:'бейц', p:'652 руб.', i:B+'5c84a08f2add8cebcf8f5414c78d2cf9.png?itok=-Q9WB8Nc'},
+  {m:'Аристократ №4', g:'остекленная', c:'натуральный', coat:'бейц', p:'652 руб.', i:B+'e4c5eb1592ab9281f78a38c1e8382798.png?itok=cWmct_wR'},
+  {m:'Аристократ №4', g:'остекленная', c:'коричневый',  coat:'бейц', p:'652 руб.', i:B+'a9281cee70cba67225abb498fbc9a532.png?itok=rkEjBRzs'},
+  {m:'Аристократ №4', g:'остекленная', c:'серый',       coat:'бейц', p:'652 руб.', i:B+'b57086a25c4382bb180b1baa15d7a750.png?itok=dWB0TuY-'},
+  {m:'Аристократ №4', g:'остекленная', c:'бордовый',    coat:'бейц', p:'652 руб.', i:B+'6001cd0412e03d5ac823982fac2c0a00.png?itok=nEeer9ZJ'},
+  // АРИСТОКРАТ №5
+  {m:'Аристократ №5', g:'остекленная', c:'тёмный',     coat:'бейц', p:'652 руб.', i:B+'a9eb42a2e720a8d54ff7610adac00d7f.png?itok=tTUa7Qbb'},
+  {m:'Аристократ №5', g:'остекленная', c:'натуральный', coat:'бейц', p:'652 руб.', i:B+'8aae3b29a34af649b22e7e34791c3c63.png?itok=emEPIlMz'},
+  {m:'Аристократ №5', g:'остекленная', c:'коричневый',  coat:'бейц', p:'652 руб.', i:B+'581681b56bdba3be0681f8f45126ef95.png?itok=GtXALuNL'},
+  {m:'Аристократ №5', g:'остекленная', c:'бордовый',    coat:'бейц', p:'652 руб.', i:B+'6e6cf6b5102e9ca1d35228d6ddc5bec2.png?itok=YWj1G5gI'},
+  // АРИСТОКРАТ №6
+  {m:'Аристократ №6', g:'остекленная', c:'тёмный',     coat:'бейц', p:'652 руб.', i:B+'ecdcfcb719385042c4ee3ae371864775.png?itok=lhkcelVe'},
+  {m:'Аристократ №6', g:'остекленная', c:'серый',       coat:'бейц', p:'652 руб.', i:B+'1a39556b40a43102b59fc31650bb5b23.png?itok=qD195Zhg'},
+  {m:'Аристократ №6', g:'остекленная', c:'бордовый',    coat:'бейц', p:'652 руб.', i:B+'a68c95e2f0c2285244189439d7ee3bbc.png?itok=9g6D36vo'},
+  {m:'Аристократ №6', g:'остекленная', c:'натуральный', coat:'бейц', p:'652 руб.', i:B+'7295c86b5d59605f937b650824444a1f.png?itok=TSJThHg1'},
+  {m:'Аристократ №6', g:'остекленная', c:'коричневый',  coat:'бейц', p:'652 руб.', i:B+'3e82dde6a55f4b4e6babce9a22e574df.png?itok=0-A1jXhw'},
+  // ВЕНЕЦИЯ
+  {m:'Венеция', g:'глухая',      c:'кремовый', coat:'эмаль', p:'678 руб.', i:B+'565001e8457d11a8c9f2f1e2cb504412.jpg?itok=5FhnMq_8'},
+  {m:'Венеция', g:'остекленная', c:'кремовый', coat:'эмаль', p:'678 руб.', i:B+'296fa380f6876f4a943420fc21d3d9ab.jpg?itok=yb9XY8Qv'},
+  // СОФИЯ
+  {m:'София', g:'остекленная', c:'кремовый', coat:'эмаль', p:'610 руб.', i:B+'bcb439a958017979b41e6aec8d5f402c.jpg?itok=YV30GuDi'},
+];
+
+// Цвет кружка для каждого оттенка
+const CLR = {
+  'белый':'#f4f4f4','кремовый':'#e8d080','натуральный':'#c8a055',
+  'коричневый':'#7a4818','тёмный':'#2a1606','бордовый':'#6e1515',
+  'серый':'#909090','голубой':'#6a9ab8','слоновая кость':'#f0e8d0'
+};
+
+// Группируем варианты по модели
+function group() {
+  const m = {};
+  V.forEach(v => { if (!m[v.m]) m[v.m] = []; m[v.m].push(v); });
+  return m;
+}
+
+// Хранит активный цвет для каждой карточки: key = model+glass
+const active = {};
+
+let fModel = 'all';
+let fGlass  = 'all';
+
+// ─── Рендер сетки ───
+function render() {
+  const G = group();
+  const models = Object.keys(G).filter(m => {
+    if (fModel !== 'all' && m !== fModel) return false;
+    if (fGlass !== 'all' && !G[m].some(v => v.g === fGlass)) return false;
+    return true;
+  });
+
+  const n = models.length;
+  document.getElementById('cNum').textContent = n;
+  document.getElementById('cLbl').textContent = n === 1 ? 'модель' : n < 5 ? 'модели' : 'моделей';
+
+  if (!n) {
+    document.getElementById('grid').innerHTML = '<div class="no-res">По выбранным фильтрам ничего не найдено</div>';
+    return;
+  }
+
+  document.getElementById('grid').innerHTML = models.map(m => {
+    const all = G[m];
+    // Варианты с учётом фильтра типа
+    const vs = fGlass === 'all' ? all : all.filter(v => v.g === fGlass);
+    // Уникальные цвета
+    const colors = [...new Map(vs.map(v => [v.c, v])).values()];
+
+    const key = m + '_' + fGlass;
+    if (!active[key]) active[key] = colors[0].c;
+    const curColor = active[key];
+    const cur = vs.find(v => v.c === curColor) || vs[0];
+
+    // Badge
+    const bc = cur.g === 'глухая' ? 'b-solid' : cur.g === 'остекленная' ? 'b-glazed' : 'b-partial';
+    const bt = cur.g === 'глухая' ? 'Глухая' : cur.g === 'остекленная' ? 'Остекленная' : 'Частично';
+
+    const sid = 'c_' + m.replace(/\s|№/g,'_');
+
+    const swHtml = colors.map(v =>
+      `<span class="sw${v.c === curColor ? ' on' : ''}"
+        style="background:${CLR[v.c]||'#bbb'};${v.c==='белый'?'border-color:#ccc':''}"
+        title="${v.c}"
+        data-m="${m}" data-c="${v.c}"
+      ></span>`
+    ).join('');
+
+    return `<div class="card" data-m="${m}" data-cur="${curColor}">
+      <div class="card-photo">
+        <img id="${sid}_img" src="${cur.i}" alt="${m}" loading="lazy">
+        <span class="badge ${bc}" id="${sid}_badge">${bt}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-label">Массив ольхи</div>
+        <div class="card-name">${m}</div>
+        <div class="swatches">${swHtml}</div>
+        <div class="sw-label" id="${sid}_lbl">${curColor} · ${cur.coat}</div>
+        <div class="card-footer">
+          <div class="card-price">от ${cur.p}<small>за комплект</small></div>
+          <button class="btn-detail" data-m="${m}">Подробнее</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Клик по кружку в карточке ───
+document.getElementById('grid').addEventListener('click', e => {
+  // Кружок
+  if (e.target.classList.contains('sw')) {
+    e.stopPropagation();
+    const m = e.target.dataset.m;
+    const c = e.target.dataset.c;
+    const key = m + '_' + fGlass;
+    active[key] = c;
+
+    const G = group();
+    const vs = fGlass === 'all' ? G[m] : G[m].filter(v => v.g === fGlass);
+    const v = vs.find(x => x.c === c) || vs[0];
+    const sid = 'c_' + m.replace(/\s|№/g,'_');
+
+    document.getElementById(sid+'_img').src = v.i;
+    document.getElementById(sid+'_lbl').textContent = c + ' · ' + v.coat;
+
+    const badge = document.getElementById(sid+'_badge');
+    badge.className = 'badge ' + (v.g==='глухая'?'b-solid':v.g==='остекленная'?'b-glazed':'b-partial');
+    badge.textContent = v.g==='глухая'?'Глухая':v.g==='остекленная'?'Остекленная':'Частично';
+
+    // Обновить активный кружок внутри этой карточки
+    const card = e.target.closest('.card');
+    card.dataset.cur = c;
+    card.querySelectorAll('.sw').forEach(s => s.classList.toggle('on', s.dataset.c === c));
+    return;
+  }
+
+  // Кнопка «Подробнее» или клик по карточке
+  const card = e.target.closest('.card');
+  if (!card) return;
+  openModal(card.dataset.m, card.dataset.cur);
+});
+
+// ─── Модальное окно ───
+let mModel = '';
+
+function openModal(m, curColor) {
+  mModel = m;
+  const G = group();
+  const all = G[m];
+  renderModal(m, all, curColor || all[0].c);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function renderModal(m, all, curColor) {
+  const v = all.find(x => x.c === curColor) || all[0];
+  const colors = [...new Map(all.map(x => [x.c, x])).values()];
+
+  document.getElementById('mHead').textContent = 'Массив ольхи · ' + m;
+  document.getElementById('mTag').textContent = m;
+  document.getElementById('mName').textContent = m + ' · ' + v.g;
+  document.getElementById('mImg').src = v.i;
+  document.getElementById('mPrice').textContent = 'от ' + v.p;
+  document.getElementById('mColorLabel').textContent = v.c + ' · ' + v.coat;
+
+  document.getElementById('mSwatches').innerHTML = colors.map(x =>
+    `<span class="m-sw${x.c===curColor?' on':''}"
+      style="background:${CLR[x.c]||'#bbb'};${x.c==='белый'?'border-color:#ccc':''}"
+      title="${x.c}" data-mc="${x.c}"></span>`
+  ).join('');
+
+  document.getElementById('mSpecs').innerHTML = [
+    ['Материал','Массив ольхи'],
+    ['Тип',      v.g],
+    ['Покрытие', v.coat],
+    ['Цвет',     v.c],
+    ['Ширина',  '600 / 700 / 800 / 900 мм'],
+    ['Высота',  '2000 мм'],
+    ['Толщина', '40 мм'],
+  ].map(([k,val]) => `<tr><td>${k}</td><td>${val}</td></tr>`).join('');
+}
+
+// Клик по кружку в модале
+document.getElementById('mSwatches').addEventListener('click', e => {
+  const sw = e.target.closest('.m-sw');
+  if (!sw) return;
+  const c = sw.dataset.mc;
+  const G = group();
+  renderModal(mModel, G[mModel], c);
+});
+
+// Закрыть модал
+document.getElementById('mClose').onclick = () => document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target.id === 'overlay') document.getElementById('overlay').classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('overlay').classList.remove('open');
+});
+
+// ─── Фильтры ───
+document.getElementById('modelNav').addEventListener('click', e => {
+  const btn = e.target.closest('.model-btn');
+  if (!btn) return;
+  document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  fModel = btn.dataset.m;
+  render();
+});
+
+document.querySelector('.type-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.type-btn');
+  if (!btn) return;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  fGlass = btn.dataset.g;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
